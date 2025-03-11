@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itinerary</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    body {
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+.card {
+    margin-bottom: 15px;
+}
+.map-placeholder, .weather-placeholder {
+    height: 200px;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">Your Itinerary</h2>
+        <p class="text-center">Explore your planned destinations and activities.</p>
+        
+        <div class="map-placeholder">Google Maps Integration (Coming Soon)</div>
+        <div class="weather-placeholder mt-3">Weather Forecast (Coming Soon)</div>
+        
+        <h3 class="mt-4">Places to Visit</h3>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Place Name</h5>
+                <p class="card-text">Brief description of the place with cultural and historical significance.</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Place Name</h5>
+                <p class="card-text">Brief description of the place with cultural and historical significance.</p>
+            </div>
+        </div>
+        
+        <a href="trip-planner.html" class="btn btn-primary w-100 mt-3">Modify Trip</a>
+    </div>
+</body>
+</html>
