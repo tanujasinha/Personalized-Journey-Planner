@@ -1,26 +1,25 @@
-//backend/routes/transportRoutes.js
-
+// backend/routes/transportRoutes.js - Updated transport routes
 const express = require("express");
 const router = express.Router();
+const TransportService = require("../services/transportService");
 
-// Example: Get transport options based on destination
-router.get("/:destination", async (req, res) => {
-    try {
-        const destination = req.params.destination;
-        
-        // Mock transport data (replace this with API calls later)
-        const transportOptions = [
-            { mode: "Flight", price: 300, duration: "2h", provider: "Airline XYZ" },
-            { mode: "Train", price: 100, duration: "5h", provider: "Express Train" },
-            { mode: "Bus", price: 50, duration: "7h", provider: "City Bus Service" },
-            { mode: "Taxi", price: 150, duration: "3h", provider: "Local Taxi" }
-        ];
-
-        res.json({ destination, transportOptions });
-    } catch (error) {
-        console.error("Error fetching transport data:", error);
-        res.status(500).json({ message: "Server error" });
+// Get transport options based on origin and destination
+router.get("/options", async (req, res) => {
+  try {
+    const { origin, destination } = req.query;
+    
+    if (!origin || !destination) {
+      return res.status(400).json({ message: "Origin and destination are required" });
     }
+    
+    const transportService = new TransportService();
+    const transportOptions = await transportService.getTransportOptions(origin, destination);
+    
+    res.json({ origin, destination, transportOptions });
+  } catch (error) {
+    console.error("Error fetching transport data:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 });
 
 module.exports = router;

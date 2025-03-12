@@ -6,6 +6,7 @@ const cors = require("cors");
 const authRoutes = require("./backend/routes/authRoutes");
 const transportRoutes = require("./backend/routes/transportRoutes");
 const tripRoutes = require("./backend/routes/tripRoutes");
+const weatherRoutes = require("./backend/routes/weatherRoutes");
 const path = require("path");
 
 dotenv.config();
@@ -16,6 +17,14 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(express.static("frontend")); // Serve static frontend files
+
+// Make API keys available to the application
+app.use((req, res, next) => {
+  req.googlePlacesApiKey = process.env.GOOGLE_PLACES_API_KEY;
+  req.googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
+  req.openWeatherApiKey = process.env.OPENWEATHER_API_KEY;
+  next();
+});
 
 // Serve frontend pages
 app.get("/", (req, res) => {
@@ -47,15 +56,17 @@ app.get("/transport-guidance", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/transport", transportRoutes);
 app.use("/api/trip", tripRoutes);
+app.use("/api/weather", weatherRoutes);
+
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
 
-
 // Start Server
 const PORT = process.env.PORT || 5001;
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
