@@ -50,13 +50,24 @@ router.post("/login", async (req, res) => {
         }
 
         // Generate JWT token
-        const token = jwt.sign({ id: user._id }, "secretKey", { expiresIn: "1h" });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-        res.json({ message: "Login successful", token });
+        // Set the token in HTTP-only cookie
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // Set to true in production
+            maxAge: 3600000, // 1 hour
+        });
 
+        res.json({ message: "Login successful" });
     } catch (error) {
         res.status(500).json({ message: "Server error" });
     }
+});
+// LOGOUT user (Clears cookie)
+router.post("/logout", (req, res) => {
+    res.clearCookie("token");
+    res.json({ message: "Logged out successfully" });
 });
 
 module.exports = router;

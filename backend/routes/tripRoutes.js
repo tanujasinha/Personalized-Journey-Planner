@@ -11,14 +11,14 @@ const TransportService = require("../services/transportService");
 const verifyToken = require("../middleware/auth");
 
 // Generate itinerary
-router.post("/plan", async (req, res) => {
+router.post("/plan",verifyToken, async (req, res) => {
     try {
-        const { destination, days, interests, budget, startDate  } = req.body;
+        const { destination, days, interests, budget ,startDate} = req.body;
 
          
     // Initialize services with API keys
-    const placesService = new PlacesService(req.googlePlacesApiKey);
-    const weatherService = new WeatherService(req.openWeatherApiKey);
+    const placesService = new PlacesService(process.env.GOOGLE_PLACES_API_KEY);
+    const weatherService = new WeatherService(process.env.OPENWEATHER_API_KEY);
     const transportService = new TransportService();
     
     // 1. Get places based on destination and interests
@@ -44,7 +44,7 @@ router.post("/plan", async (req, res) => {
     
     // 3. Prepare itinerary data
     const startDateObj = startDate ? new Date(startDate) : new Date();
-    const dailyBudget = budget / days;
+    const dailyBudget = days > 0 ? budget / days : 0;
     const itineraryData = [];
     
     // Calculate places per day based on total places and days
@@ -91,7 +91,7 @@ router.post("/plan", async (req, res) => {
       // Get weather for this day if available
       const dayWeather = weatherForecast[i] || {
         temperature: { avg: 20 },
-        condition: 'Clear',
+        condition: 'Unknown',
         icon: '01d'
       };
       
