@@ -1,38 +1,7 @@
-// frontend/js/itinerary.js
-document.addEventListener('DOMContentLoaded', async function () {
-    // Get trip data from session storage
-    const tripData = JSON.parse(sessionStorage.getItem('tripData'));
-    if (!tripData) {
-        window.location.href = 'trip-planner.html';
-        return;
-    }
+const weatherContainer = document.querySelector('.weather-placeholder');
 
-    try {
-        // Fetch itinerary data
-        const response = await fetch(`/api/itinerary?destination=${encodeURIComponent(tripData.destination)}&days=${tripData.days}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch itinerary data');
-        }
+// Get trip data from session storage
 
-        const data = await response.json();
-
-        // Populate places
-        populatePlaces(data.places);
-
-        // Initialize map
-        initMap(data.places, tripData.destination);
-
-        // Initialize weather
-        initWeather(tripData.destination, data.weather);
-    } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('places-container').innerHTML = `
-            <div class="alert alert-danger">
-                Failed to load itinerary data. Please try again.
-            </div>
-        `;
-    }
-});
 
 function populatePlaces(places) {
     const placesContainer = document.getElementById('places-container');
@@ -65,8 +34,8 @@ function initMap(places, destination) {
 
     // Create a map centered on the destination
     const map = new google.maps.Map(mapContainer, {
-        zoom: 13,
-        center: { lat: 0, lng: 0 }
+        center: { lat: 0, lng: 0 },
+        zoom: 13
     });
 
     // Geocode the destination to get its coordinates
@@ -77,7 +46,6 @@ function initMap(places, destination) {
 
             // Add markers for each place
             places.forEach(place => {
-                // If place has coordinates, use them; otherwise, geocode the place name
                 if (place.coordinates) {
                     addMarker(place.coordinates.lat, place.coordinates.lng, place.name);
                 } else {
@@ -106,13 +74,47 @@ function initMap(places, destination) {
     }
 }
 
-function initWeather(destination, weatherData) {
-    const weatherContainer = document.querySelector('.weather-placeholder');
+async function fetchWeather(lat, lon, destination) {
+    const apiKey = "c8d47b3c69227c3bba7dd17a791dc037"; // OpenWeather API Key
 
-    if (!weatherData) {
+    try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch weather data');
+        }
+
+        const data = await response.json();
+        const forecastData = processWeatherData(data);
+
+        displayWeather(destination, forecastData);
+    } catch (error) {
+        console.error('Weather Fetch Error:', error);
         weatherContainer.innerHTML = '<p>Weather data not available</p>';
-        return;
     }
+}
+
+function processWeatherData(data) {
+    const dailyForecast = {};
+
+    data.list.forEach(entry => {
+        const date = entry.dt_txt.split(" ")[0];
+        if (!dailyForecast[date]) {
+            dailyForecast[date] = {
+                temperature: entry.main.temp,
+                description: entry.weather[0].description,
+                humidity: entry.main.humidity,
+                windSpeed: entry.wind.speed
+            };
+        }
+    });
+
+    return Object.entries(dailyForecast).map(([date, details]) => ({
+        date,
+        ...details
+    })).slice(0, tripData.days); // Get n day forecast
+}
+
+function displayWeather(destination, forecast) {
 
     let weatherHTML = `
         <div class="container">
@@ -120,7 +122,7 @@ function initWeather(destination, weatherData) {
             <div class="row">
     `;
 
-    weatherData.forecast.forEach(day => {
+    forecast.forEach(day => {
         weatherHTML += `
             <div class="col-md-3 col-6 text-center mb-3">
                 <div class="card h-100">
@@ -145,3 +147,43 @@ function initWeather(destination, weatherData) {
 
     weatherContainer.innerHTML = weatherHTML;
 }
+
+document.addEventListener('DOMContentLoaded', async function () {
+const tripData = JSON.parse(sessionStorage.getItem('tripData'));
+console.log("Trip Data:", tripData);
+
+if (!tripData) {
+    window.location.href = 'trip-planner.html';
+}
+
+try {
+    // Fetch itinerary data
+    const response = await fetch(`/api/itinerary?destination=${encodeURIComponent(tripData.destination)}&days=${tripData.days}`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch itinerary data');
+    }
+
+    const data = await response.json();
+
+    console.log("Initializing map with destination:", tripData.destination);
+
+    populatePlaces(data.places);
+
+    // Initialize map
+    initMap(data.places, tripData.destination);
+
+    // Fetch and display weather using latitude and longitude
+    if (tripData.latitude && tripData.longitude) {
+        fetchWeather(tripData.latitude, tripData.longitude, tripData.destination);
+    } else {
+        weatherContainer.innerHTML = '<p>Weather data not available</p>';
+    }
+} catch (error) {
+    console.error('Error:', error);
+    document.getElementById('places-container').innerHTML = `
+            <div class="alert alert-danger">
+                Failed to load itinerary data. Please try again.
+            </div>
+        `;
+}
+});

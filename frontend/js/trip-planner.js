@@ -1,7 +1,10 @@
-document.addEventListener('DOMContentLoaded', function () {
+// frontend/trip-planner.html
+
+let latitude,longitude;
+document.addEventListener('DOMContentLoaded', async function () {
     const destinationInput = document.getElementById('destination');
 
-    // Create a dropdown list element
+    // Create alet latitude  dropdown list element
     let suggestionList = document.createElement('ul');
     suggestionList.id = 'autocomplete-list';
     suggestionList.style.position = 'absolute';
@@ -25,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=5`);
             const results = await response.json();
-
+console.log(results);
             suggestionList.innerHTML = ''; // Clear previous results
 
             if (results.length === 0) {
@@ -45,6 +48,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     listItem.addEventListener('click', function () {
                         destinationInput.value = place.display_name;
+                        latitude = place.lat;
+                        longitude = place.lon;
+                        console.log("Latitude :",latitude,"Longitude :", longitude);
                         suggestionList.innerHTML = ''; // Clear dropdown on selection
                     });
 
@@ -72,12 +78,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // Ensure the form submission logic remains the same
-document.addEventListener('DOMContentLoaded', function () {
     const tripForm = document.getElementById('trip-form');
     if (tripForm) {
         tripForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-
             const destination = document.getElementById('destination').value;
             const days = document.getElementById('days').value;
             const budget = document.getElementById('budget').value;
@@ -90,6 +94,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             sessionStorage.setItem('tripData', JSON.stringify({
                 destination,
+                latitude,
+                longitude,
                 days,
                 budget,
                 interests
@@ -101,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ destination, days, budget, interests })
                 });
-
+                
                 if (!response.ok) throw new Error('Failed to generate itinerary');
 
                 window.location.href = 'itinerary.html';
@@ -111,4 +117,3 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-});
