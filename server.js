@@ -37,8 +37,8 @@ app.get("/trip-planner(.html)?", (req, res) => {
 app.get("/profile(.html)?", (req, res) => {
   res.sendFile(path.join(__dirname, "frontend","pages","profile.html"));
 });
-app.get("/about(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend","pages","about.html"));
+app.get("/contact(.html)?", (req, res) => {
+  res.sendFile(path.join(__dirname, "frontend","pages","contact.html"));
 });
 app.get("/transport-guidance(.html)?", (req, res) => {
   res.sendFile(path.join(__dirname, "frontend", "pages","transport-guidance.html"));
