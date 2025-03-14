@@ -100,20 +100,7 @@ console.log(results);
                 budget,
                 interests
             }));
-
-            try {
-                const response = await fetch('/api/generate-itinerary', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ destination, days, budget, interests })
-                });
-                
-                if (!response.ok) throw new Error('Failed to generate itinerary');
-
-                window.location.href = 'itinerary.html';
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to generate itinerary. Please try again.');
-            }
+            window.location.href = 'itinerary.html';
+           
         });
     }
