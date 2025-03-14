@@ -1,7 +1,9 @@
 const weatherContainer = document.querySelector('.weather-placeholder');
-
+const tripData = JSON.parse(sessionStorage.getItem('tripData'));
+console.log("Trip Data:", tripData);
+document.addEventListener('DOMContentLoaded', async function () {
+  
 // Get trip data from session storage
-
 
 function populatePlaces(places) {
     const placesContainer = document.getElementById('places-container');
@@ -79,13 +81,14 @@ async function fetchWeather(lat, lon, destination) {
 
     try {
         const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`);
+        console.log("fetchWeather function got a response");
         if (!response.ok) {
             throw new Error('Failed to fetch weather data');
         }
 
         const data = await response.json();
         const forecastData = processWeatherData(data);
-
+      
         displayWeather(destination, forecastData);
     } catch (error) {
         console.error('Weather Fetch Error:', error);
@@ -118,8 +121,8 @@ function displayWeather(destination, forecast) {
 
     let weatherHTML = `
         <div class="container">
-            <h5 class="mb-3">Weather Forecast for ${destination}</h5>
-            <div class="row">
+            <h5 class="mb-3" style="text-align:center">${destination}</h5>
+            <div class="row" style="justify-content: center;">
     `;
 
     forecast.forEach(day => {
@@ -147,43 +150,40 @@ function displayWeather(destination, forecast) {
 
     weatherContainer.innerHTML = weatherHTML;
 }
+  
 
-document.addEventListener('DOMContentLoaded', async function () {
-const tripData = JSON.parse(sessionStorage.getItem('tripData'));
-console.log("Trip Data:", tripData);
-
-if (!tripData) {
-    window.location.href = 'trip-planner.html';
-}
-
-try {
-    // Fetch itinerary data
-    const response = await fetch(`/api/itinerary?destination=${encodeURIComponent(tripData.destination)}&days=${tripData.days}`);
-    if (!response.ok) {
-        throw new Error('Failed to fetch itinerary data');
+    if (!tripData) {
+        window.location.href = 'trip-planner.html';
     }
 
-    const data = await response.json();
+    try {
+        // Fetch itinerary data
+        // const response = await fetch(`/api/itinerary?destination=${encodeURIComponent(tripData.destination)}&days=${tripData.days}`);
+        // if (!response.ok) {
+        //     throw new Error('Failed to fetch itinerary data');
+        // }
 
-    console.log("Initializing map with destination:", tripData.destination);
+        // const data = await response.json();
 
-    populatePlaces(data.places);
+        // console.log("Initializing map with destination:", tripData.destination);
 
-    // Initialize map
-    initMap(data.places, tripData.destination);
+        // populatePlaces(data.places);
 
-    // Fetch and display weather using latitude and longitude
-    if (tripData.latitude && tripData.longitude) {
-        fetchWeather(tripData.latitude, tripData.longitude, tripData.destination);
-    } else {
-        weatherContainer.innerHTML = '<p>Weather data not available</p>';
-    }
-} catch (error) {
-    console.error('Error:', error);
-    document.getElementById('places-container').innerHTML = `
+        // // Initialize map
+        // initMap(data.places, tripData.destination);
+
+        // Fetch and display weather using latitude and longitude
+        if (tripData.latitude && tripData.longitude) {
+            fetchWeather(tripData.latitude, tripData.longitude, tripData.destination);
+                    } else {
+            weatherContainer.innerHTML = '<p>Weather data not available</p>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('places-container').innerHTML = `
             <div class="alert alert-danger">
                 Failed to load itinerary data. Please try again.
             </div>
         `;
-}
+    }
 });
