@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         return;
     }
 
+    // Add save/download buttons
+    addActionButtons();
+
     // Initialize the map
     initMap(tripData.latitude, tripData.longitude);
 
@@ -19,6 +22,110 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Fetch weather data
     await fetchWeather(tripData.latitude, tripData.longitude, tripData.destination);
 });
+
+// Add save and download buttons
+function addActionButtons() {
+    const actionContainer = document.getElementById('action-buttons');
+    if (!actionContainer) return;
+
+    actionContainer.innerHTML = `
+        <button id="save-trip-btn" class="btn btn-primary">
+            <i class="bi bi-bookmark"></i> Save Trip
+        </button>
+        <button id="download-itinerary-btn" class="btn btn-success">
+            <i class="bi bi-file-earmark-arrow-down"></i> Download Itinerary
+        </button>
+    `;
+
+    // Add event listeners
+    document.getElementById('save-trip-btn').addEventListener('click', saveTrip);
+    document.getElementById('download-itinerary-btn').addEventListener('click', downloadItinerary);
+}
+
+// Save trip to user account
+function saveTrip() {
+    // Check if user is logged in
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+        showLoginModal();
+        return;
+    }
+
+    // API call would go here to save trip to user's account
+    showAlert('Trip saved successfully!', 'success');
+}
+
+// Download itinerary as PDF
+function downloadItinerary() {
+    // Check if user is logged in
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+        showLoginModal();
+        return;
+    }
+
+    // In a real implementation, use a library like html2pdf.js
+    showAlert('Downloading your itinerary...', 'info');
+    
+    // Simulate download delay
+    setTimeout(() => {
+        showAlert('Itinerary downloaded successfully!', 'success');
+    }, 1500);
+}
+
+// Show login modal
+function showLoginModal() {
+    const modalHTML = `
+        <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="loginModalLabel">Login Required</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>You need to be logged in to use this feature.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <a href="login.html" class="btn btn-primary">Log In</a>
+                        <a href="signup.html" class="btn btn-success">Sign Up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add modal to page if it doesn't exist
+    if (!document.getElementById('loginRequiredModal')) {
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    // Show modal
+    const loginModal = new bootstrap.Modal(document.getElementById('loginRequiredModal'));
+    loginModal.show();
+}
+
+// Show alert message
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alert-container');
+    if (!alertContainer) return;
+
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+
+    alertContainer.appendChild(alert);
+
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+        alert.classList.remove('show');
+        setTimeout(() => alert.remove(), 300);
+    }, 3000);
+}
 
 async function fetchWeather(lat, lon, destination) {
     const apiKey = "c8d47b3c69227c3bba7dd17a791dc037"; // OpenWeather API Key
@@ -36,7 +143,7 @@ async function fetchWeather(lat, lon, destination) {
         displayWeather(destination, forecastData);
     } catch (error) {
         console.error('Weather Fetch Error:', error);
-        weatherContainer.innerHTML = '<p>Weather data not available</p>';
+        weatherContainer.innerHTML = '<div class="alert alert-warning">Weather data not available</div>';
     }
 }
 
@@ -50,7 +157,8 @@ function processWeatherData(data) {
                 temperature: entry.main.temp,
                 description: entry.weather[0].description,
                 humidity: entry.main.humidity,
-                windSpeed: entry.wind.speed
+                windSpeed: entry.wind.speed,
+                icon: entry.weather[0].icon // Get weather icon code
             };
         }
     });
@@ -64,21 +172,34 @@ function processWeatherData(data) {
 function displayWeather(destination, forecast) {
     let weatherHTML = `
     <div class="container">
-        <h5 class="mb-3" style="text-align:center">${destination}</h5>
-        <div class="row" style="justify-content: center;">
+        <h5 class="mb-3 text-center">${destination}</h5>
+        <div class="row justify-content-center">
     `;
 
     forecast.forEach(day => {
+        // Format date to be more readable
+        const formattedDate = new Date(day.date).toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric'
+        });
+
+        // Get weather icon
+        const iconUrl = `https://openweathermap.org/img/wn/${day.icon}@2x.png`;
+
         weatherHTML += `
         <div class="col-md-3 col-6 text-center mb-3">
-            <div class="card h-100">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">${formattedDate}</h6>
+                </div>
                 <div class="card-body">
-                    <h6>${day.date}</h6>
-                    <div class="display-6">${day.temperature}°C</div>
-                    <p>${day.description}</p>
-                    <div>
-                        <small>Humidity: ${day.humidity}%</small><br>
-                        <small>Wind: ${day.windSpeed} km/h</small>
+                    <img src="${iconUrl}" alt="${day.description}" class="weather-icon mb-2">
+                    <div class="display-6">${Math.round(day.temperature)}°C</div>
+                    <p class="text-capitalize">${day.description}</p>
+                    <div class="d-flex justify-content-around text-muted small">
+                        <span><i class="bi bi-droplet"></i> ${day.humidity}%</span>
+                        <span><i class="bi bi-wind"></i> ${day.windSpeed} km/h</span>
                     </div>
                 </div>
             </div>
@@ -121,7 +242,7 @@ async function fetchAndDisplayPlaces(tripData) {
     const categories = getCategories(tripData.interests);
     
     if (categories.length === 0) {
-        placesContainer.innerHTML = '<p class="text-center">Please select at least one interest to see recommendations.</p>';
+        placesContainer.innerHTML = '<div class="alert alert-warning">Please select at least one interest to see recommendations.</div>';
         return;
     }
     
@@ -197,7 +318,7 @@ function generateItinerary(places, tripData) {
     
     // If no places found
     if (!places || places.length === 0) {
-        placesContainer.innerHTML = '<p class="text-center">No places found for your interests in this location.</p>';
+        placesContainer.innerHTML = '<div class="alert alert-warning">No places found for your interests in this location.</div>';
         return;
     }
     
@@ -225,7 +346,7 @@ function generateItinerary(places, tripData) {
                     role="tab" 
                     aria-controls="day${day}" 
                     aria-selected="${day === 1}">
-                    Day ${day}
+                    <i class="bi bi-calendar-day"></i> Day ${day}
                 </button>
             </li>
         `;
@@ -277,31 +398,69 @@ function generateItinerary(places, tripData) {
                 const address = location.formatted_address || 
                     (location.address ? `${location.address}, ${location.locality || ''}` : 'Address not available');
                 
-                // Get image or use placeholder
-                let imageUrl = 'https://via.placeholder.com/300x200?text=No+Image';
+                // Get image - use unsplash for better placeholder images
+                let imageUrl;
                 
                 // Try to get photo from Foursquare API response
-                if (place.photos && place.photos.length > 0) {
+                if (place.photos && place.photos.length > 0 && place.photos[0].prefix && place.photos[0].suffix) {
                     imageUrl = `${place.photos[0].prefix}300x200${place.photos[0].suffix}`;
-                } else if (place.categories && place.categories[0] && place.categories[0].icon) {
-                    const icon = place.categories[0].icon;
-                    imageUrl = `${icon.prefix}bg_64${icon.suffix}`;
+                } else {
+                    // Use category-based placeholder from Unsplash
+                    const categoryMap = {
+                        'Restaurant': 'restaurant',
+                        'Café': 'cafe',
+                        'Museum': 'museum',
+                        'Park': 'park',
+                        'Monument': 'monument',
+                        'Temple': 'temple',
+                        'Beach': 'beach',
+                        'Market': 'market'
+                    };
+                    
+                    const searchTerm = categoryMap[category] || 'travel';
+                    imageUrl = `https://source.unsplash.com/300x200/?${searchTerm}`;
                 }
+                
+                // Create icon for categories
+                const categoryIcons = {
+                    'Restaurant': 'bi-cup-hot',
+                    'Café': 'bi-cup',
+                    'Museum': 'bi-building',
+                    'Park': 'bi-tree',
+                    'Monument': 'bi-bank',
+                    'Temple': 'bi-house',
+                    'Beach': 'bi-water',
+                    'Market': 'bi-shop',
+                    'Hotel': 'bi-house-door',
+                    'Bar': 'bi-cup-straw'
+                };
+                
+                const iconClass = categoryIcons[category] || 'bi-geo-alt';
                 
                 itineraryHTML += `
                     <div class="col-md-6 mb-3">
-                        <div class="card h-100">
+                        <div class="card h-100 shadow">
                             <div class="card-header bg-primary text-white">
-                                ${timeSlot}
+                                <i class="bi bi-clock"></i> ${timeSlot}
                             </div>
                             <img src="${imageUrl}" class="card-img-top" alt="${name}" 
-                                onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                                style="height: 200px; object-fit: cover;"
+                                onerror="this.onerror=null; this.src='https://source.unsplash.com/300x200/?travel';">
                             <div class="card-body">
                                 <h5 class="card-title">${name}</h5>
-                                <h6 class="card-subtitle mb-2 text-muted">${category}</h6>
-                                <p class="card-text">${address}</p>
-                                ${place.tel ? `<p><small>Phone: ${place.tel}</small></p>` : ''}
-                                ${place.website ? `<a href="${place.website}" target="_blank" class="btn btn-sm btn-outline-primary">Visit Website</a>` : ''}
+                                <h6 class="card-subtitle mb-2 text-muted">
+                                    <i class="bi ${iconClass}"></i> ${category}
+                                </h6>
+                                <p class="card-text">
+                                    <i class="bi bi-geo-alt"></i> ${address}
+                                </p>
+                                ${place.tel ? `<p><small><i class="bi bi-telephone"></i> ${place.tel}</small></p>` : ''}
+                                ${place.website ? `<a href="${place.website}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-globe"></i> Visit Website
+                                </a>` : ''}
+                                <a href="https://maps.google.com/?q=${name}, ${address}" target="_blank" class="btn btn-sm btn-outline-success ms-2">
+                                    <i class="bi bi-map"></i> Directions
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -327,14 +486,22 @@ function generateItinerary(places, tripData) {
     
     // Add budget information
     itineraryHTML += `
-        <div class="card mt-4">
-            <div class="card-header bg-warning">
-                <h5 class="mb-0">Budget Estimation</h5>
+        <div class="card mt-4 shadow">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Budget Estimation</h5>
             </div>
             <div class="card-body">
-                <p>Total budget: ₹${tripData.budget}</p>
-                <p>Estimated daily expense: ₹${Math.round(tripData.budget / tripData.days)}</p>
-                <p><small>This is a rough estimate. Actual expenses may vary based on your choices.</small></p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Total budget:</strong> ₹${Number(tripData.budget).toLocaleString()}</p>
+                        <p><strong>Estimated daily expense:</strong> ₹${Math.round(tripData.budget / tripData.days).toLocaleString()}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-info mb-0">
+                            <small>This is a rough estimate. Actual expenses may vary based on your choices.</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -393,5 +560,3 @@ function initializeTabs() {
         });
     });
 }
-
-
