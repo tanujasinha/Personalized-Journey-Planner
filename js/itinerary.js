@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     addActionButtons();
 
     // Initialize the map
-    initMap(tripData.latitude, tripData.longitude);
+    initMap(parseFloat(tripData.latitude), parseFloat(tripData.longitude));
 
     // Fetch and display places
     await fetchAndDisplayPlaces(tripData);
