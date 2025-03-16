@@ -1,4 +1,4 @@
-// frontend/trip-planner.html
+// js/trip-planner.js
 
 let latitude,longitude;
 document.addEventListener('DOMContentLoaded', async function () {

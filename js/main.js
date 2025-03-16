@@ -1,4 +1,4 @@
-// frontend/js/main.js
+// js/main.js
 
 document.addEventListener("DOMContentLoaded", function () {
     // Initialize Google Maps API

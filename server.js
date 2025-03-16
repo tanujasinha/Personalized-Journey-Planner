@@ -16,7 +16,7 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5000", credentials: true }));
 // Serve static frontend files
-app.use(express.static(path.join(__dirname, "frontend")));
+app.use(express.static(path.join(__dirname)));
 app.use(session({
   secret: 'your-secret-key',
   resave: false,
@@ -25,31 +25,31 @@ app.use(session({
 }));
 // Serve frontend pages
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "pages", "index.html"));
+  res.sendFile(path.join(__dirname, "pages", "index.html"));
 });
 app.get("/login(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "pages", "login.html"));
+  res.sendFile(path.join(__dirname,  "pages", "login.html"));
 });
 app.get("/signup(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "pages", "signup.html"));
+  res.sendFile(path.join(__dirname,  "pages", "signup.html"));
 });
 app.get("/dashboard(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "pages", "dashboard.html"));
+  res.sendFile(path.join(__dirname, "pages", "dashboard.html"));
 });
 app.get("/itinerary(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "pages", "itinerary.html"));
+  res.sendFile(path.join(__dirname,  "pages", "itinerary.html"));
 });
 app.get("/trip-planner(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "pages", "trip-planner.html"));
+  res.sendFile(path.join(__dirname, "pages", "trip-planner.html"));
 });
 app.get("/profile(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "pages", "profile.html"));
+  res.sendFile(path.join(__dirname, "pages", "profile.html"));
 });
 app.get("/contact(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "pages", "contact.html"));
+  res.sendFile(path.join(__dirname, "pages", "contact.html"));
 });
 app.get("/transport-guidance(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "pages", "transport-guidance.html"));
+  res.sendFile(path.join(__dirname, "pages", "transport-guidance.html"));
 });
 app.get('/api/logout', (req, res) => {
   req.session.destroy();

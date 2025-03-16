@@ -1,4 +1,4 @@
-//frontend/js/transport-guidance.js
+//js/transport-guidance.js
 
 document.addEventListener('DOMContentLoaded', function() {
     // Reference to all buttons

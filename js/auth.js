@@ -1,4 +1,4 @@
-// frontend/js/auth.js
+// js/auth.js
 document.addEventListener('DOMContentLoaded', function() {
     // Get current page
     const currentPage = window.location.pathname.split('/').pop();

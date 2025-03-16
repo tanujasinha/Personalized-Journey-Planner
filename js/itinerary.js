@@ -1,3 +1,5 @@
+// js/itinerary.js
+
 const weatherContainer = document.querySelector('.weather-placeholder');
 const tripData = JSON.parse(sessionStorage.getItem('tripData'));
 console.log("Trip Data:", tripData);
