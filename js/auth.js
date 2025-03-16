@@ -143,7 +143,7 @@ function logout() {
     .then(response => response.json())
     .then(data => {
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        window.location.href = '/';
     })
     .catch(error => {
         console.error('Logout error:', error);
