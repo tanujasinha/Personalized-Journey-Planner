@@ -100,7 +100,13 @@ console.log(results);
                 budget,
                 interests
             }));
-            window.location.href = 'itinerary.html';
+            const submitBtn=document.getElementById('trip-submit');
+            submitBtn.textContent="Planning your trip ...";
+    submitBtn.style.backgroundColor="blue";
+    setTimeout(()=>{
+        window.location.href = 'itinerary.html';
+    },2000);
+            
            
         });
     }
