@@ -2,6 +2,14 @@
 
 let latitude,longitude;
 document.addEventListener('DOMContentLoaded', async function () {
+    fetch("/api/check-auth", { credentials: "include" })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.isAuthenticated) {
+       document.querySelector('.back-link').style.display="none";
+      } 
+    })
+    .catch(error => console.error("Error checking auth:", error));
     const destinationInput = document.getElementById('destination');
 
     // Create alet latitude  dropdown list element

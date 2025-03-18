@@ -10,6 +10,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         return;
     }
 
+    fetch("/api/check-auth", { credentials: "include" })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.isAuthenticated) {
+       document.querySelector('.back-link').style.display="none";
+      } 
+    })
+    .catch(error => console.error("Error checking auth:", error));
+  
+
     // Add save/download buttons
     addActionButtons();
 
@@ -45,25 +55,35 @@ function addActionButtons() {
 // Save trip to user account
 function saveTrip() {
     // Check if user is logged in
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user) {
-        showLoginModal();
-        return;
-    }
-
+    fetch("/api/check-auth", { credentials: "include" })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.isAuthenticated) {
+       showLoginModal();
+       return;
+      } 
+      else{
+        
     // API call would go here to save trip to user's account
     showAlert('Trip saved successfully!', 'success');
+      }
+    })
+    .catch(error => console.error("Error checking auth:", error));
+
 }
 
 // Download itinerary as PDF
 function downloadItinerary() {
     // Check if user is logged in
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user) {
-        showLoginModal();
-        return;
-    }
 
+    fetch("/api/check-auth", { credentials: "include" })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.isAuthenticated) {
+       showLoginModal();
+       return;
+      } else{
+        
     // Create content for download
     const itineraryContent = document.getElementById('places-container').innerHTML;
     const weatherContent = document.querySelector('.weather-placeholder').innerHTML;
@@ -122,6 +142,10 @@ function downloadItinerary() {
     }, 0);
     
     showAlert('Itinerary downloaded successfully!', 'success');
+      }
+    })
+    .catch(error => console.error("Error checking auth:", error));
+
 }
 
 // Show login modal

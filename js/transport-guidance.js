@@ -1,6 +1,14 @@
 //js/transport-guidance.js
 
 document.addEventListener('DOMContentLoaded', function() {
+    fetch("/api/check-auth", { credentials: "include" })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.isAuthenticated) {
+       document.querySelector('.back-link').style.display="none";
+      } 
+    })
+    .catch(error => console.error("Error checking auth:", error));
     // Reference to all buttons
     const transportButtons = document.querySelectorAll('.btn-custom');
     
