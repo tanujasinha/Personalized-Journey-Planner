@@ -15,6 +15,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors());
+
 // Serve static frontend files
 app.use(express.static(path.join(__dirname)));
 app.use(session({
@@ -71,12 +72,7 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model('User', userSchema);
-// Start Server
-const PORT = 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} - http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT;
 
 // Routes
 app.post('/api/signup', async (req, res) => {
@@ -160,3 +156,7 @@ app.get('/api/check-auth', (req, res) => {
   }
 });
 
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT} - http://localhost:${PORT}`);
+});
